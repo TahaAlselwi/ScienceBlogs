@@ -6,19 +6,22 @@ namespace ScienceBlogs.Controllers
 {
     public class HomeController : Controller
     {
+        BlogsContext blog;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger,BlogsContext context)
         {
             _logger = logger;
+            blog = context;
         }
 
         public IActionResult Index()
         {
-            return View();
+            var c = blog.Categories.ToList();
+            return View(c);
         }
 
-        public IActionResult Privacy()
+        public IActionResult Post()
         {
             return View();
         }
