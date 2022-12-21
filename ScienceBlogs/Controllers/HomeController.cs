@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using ScienceBlogs.Models;
 using System.Diagnostics;
 
@@ -21,12 +22,18 @@ namespace ScienceBlogs.Controllers
             return View(c);
         }
 
-        public IActionResult Post()
+        public IActionResult Blogs(int id)
         {
-            return View();
+            var B = blog.Blogs.Where(x => x.CategoryID == id).ToList();
+            return View(B);
         }
+		public IActionResult Blog(int id)
+        {
+			var B2 = blog.Blogs.FirstOrDefault(x => x.ID == id);
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+			return View(B2);
+		}
+		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
