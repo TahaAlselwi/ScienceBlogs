@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EfCore2C</title>
+    <link rel="stylesheet" href="~/Admin/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Admin/css/site.css" />
+    <link rel="stylesheet" href="~/Admin/css/all.min.css" />
+    <link rel="stylesheet" href="~/Admin/css/framework.css" />
+    <link rel="stylesheet" href="~/Admin/css/master.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <div class="page d-flex">
+        <div class="sidebar bg-white p-20 p-relative">
+            <h3 class="p-relative txt-c mt-0">Elzero</h3>
+            <ul>
+                <li>
+                    <a class="active d-flex align-center fs-14 c-black rad-6 p-10" asp-controller="Categories" >
+                        <i class="fa-regular fa-newspaper fa-fw"></i>
+                        <span>Categories</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="d-flex align-center fs-14 c-black rad-6 p-10" asp-controller="Blogs">
+                        <i class="fa-regular fa-newspaper fa-fw"></i>
+                        <span>Blogs</span>
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+        <div class="content w-full">
+            <div class="head bg-white p-15 between-flex">
+                <div class="search p-relative">
+                    <input class="p-10" type="search" placeholder="Type A Keyword">
+                </div>
+                <div class="icons d-flex align-center">
+                    <span class="notification p-relative">
+                        <i class="fa-regular fa-bell fa-lg"></i>
+                    </span>
+                    <img src="imgs/avatar.png" alt="">
+                </div>
+            </div>
+
+            <div class="container">
+                <main role="main" class="pb-3">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+
+    </div>
+    <script src="~/Admin/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/Admin/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Admin/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
