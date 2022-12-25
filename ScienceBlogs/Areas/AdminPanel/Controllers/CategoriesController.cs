@@ -56,13 +56,13 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Image,Name,Description")] Category category)
         {
-            //if (ModelState.IsValid)
-            //{
+            if (ModelState.IsValid)
+            {
                 _context.Add(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-            //}
-            //return View(category);
+            }
+            return View(category);
         }
 
         // GET: AdminPanel/Categories/Edit/5
