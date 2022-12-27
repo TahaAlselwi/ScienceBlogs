@@ -32,16 +32,23 @@
 			<div class="collapse navbar-collapse" id="navbarsExampleDefault">
 				<!-- Begin Menu -->
 				<ul class="navbar-nav ml-auto">
+					@if (User.Identity.IsAuthenticated)
+					{
+						if (User.IsInRole("Admin"))
+						{
+							<li class="nav-item">
+								<a class="nav-link" asp-area="AdminPanel" asp-controller="Categories" asp-action="Index">Admin</a>
+							</li>
+						}
+					}
 					<li class="nav-item active">
-						<a class="nav-link" asp-controller="Home" asp-action="Index">Stories <span class="sr-only">(current)</span></a>
+						<a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home <span class="sr-only">(current)</span></a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" asp-controller="Home" asp-action="Post">Post</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" asp-controller="Home" asp-action="">Author</a>
+						<a class="nav-link" asp-area="" asp-controller="Home" asp-action="Post">Post</a>
 					</li>
 					<partial name="_LoginPartial" />
+
 				</ul>
 				<!-- End Menu -->
 			</div>
