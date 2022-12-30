@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ScienceBlogs.Models;
+using Microsoft.Extensions.Hosting;
 
 namespace ScienceBlogs.Areas.AdminPanel.Controllers
 {
@@ -16,10 +17,11 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
     public class BlogsController : Controller
     {
         private readonly BlogsContext _context;
-
-        public BlogsController(BlogsContext context)
+        private IWebHostEnvironment webHost;
+        public BlogsController(BlogsContext context, IWebHostEnvironment webHost2)
         {
             _context = context;
+            webHost = webHost2;
         }
 
         // GET: AdminPanel/Blogs
@@ -51,7 +53,7 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
         // GET: AdminPanel/Blogs/Create
         public IActionResult Create()
         {
-            ViewData["CategoryID"] = new SelectList(_context.Categories, "ID", "ID");
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "ID", "Name");
             return View();
         }
 
@@ -60,18 +62,32 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Image,Title,Description,Date,Topic,CategoryID,Author")] Blog blog)
+        public async Task<IActionResult> Create([Bind("ID,Title,Description,Date,Topic,CategoryID,Author,file")] Blog blog)
         {
             if (ModelState.IsValid)
             {
+                uploadImage(blog);
                 _context.Add(blog);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryID"] = new SelectList(_context.Categories, "ID", "ID", blog.CategoryID);
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "ID", "Name", blog.CategoryID);
             return View(blog);
         }
-
+        void uploadImage(Blog blog2)
+        {
+            if (blog2.file != null)
+            {
+                string ImagePath = Path.Combine(webHost.WebRootPath, "Images/Blogs");
+                string ImageName = new Guid() + ".jpg";
+                string TotalPath = Path.Combine(ImagePath, ImageName);
+                using (var fileStream = new FileStream(TotalPath, FileMode.Create))
+                {
+                    blog2.file.CopyTo(fileStream);
+                }
+                blog2.Image = ImageName;
+            }
+        }
         // GET: AdminPanel/Blogs/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -85,7 +101,7 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryID"] = new SelectList(_context.Categories, "ID", "ID", blog.CategoryID);
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "ID", "Name", blog.CategoryID);
             return View(blog);
         }
 
@@ -94,7 +110,7 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Image,Title,Description,Date,Topic,CategoryID,Author")] Blog blog)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Title,Description,Date,Topic,CategoryID,Author,file")] Blog blog)
         {
             if (id != blog.ID)
             {
@@ -105,6 +121,7 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
             {
                 try
                 {
+                    uploadImage(blog);
                     _context.Update(blog);
                     await _context.SaveChangesAsync();
                 }
@@ -121,7 +138,7 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryID"] = new SelectList(_context.Categories, "ID", "ID", blog.CategoryID);
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "ID", "Name", blog.CategoryID);
             return View(blog);
         }
 

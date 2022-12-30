@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ScienceBlogs.Models;
+using Microsoft.Extensions.Hosting;
 
 namespace ScienceBlogs.Areas.AdminPanel.Controllers
 {
@@ -16,10 +17,12 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
     public class CategoriesController : Controller
     {
         private readonly BlogsContext _context;
+        private IWebHostEnvironment webHost;
 
-        public CategoriesController(BlogsContext context)
+        public CategoriesController(BlogsContext context, IWebHostEnvironment webHost2)
         {
             _context = context;
+            webHost = webHost2;
         }
 
         // GET: AdminPanel/Categories
@@ -57,17 +60,31 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Image,Name,Description")] Category category)
+        public async Task<IActionResult> Create([Bind("ID,Name,Description,File")] Category category)
         {
             if (ModelState.IsValid)
             {
+                uploadImage(category);
                 _context.Add(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
         }
-
+        void uploadImage(Category category2)
+        {
+            if (category2.File != null)
+            {
+                string ImagePath = Path.Combine(webHost.WebRootPath, "Images/Categories");
+                string ImageName = new Guid() + ".jpg";
+                string TotalPath = Path.Combine(ImagePath, ImageName);
+                using (var fileStream = new FileStream(TotalPath, FileMode.Create))
+                {
+                    category2.File.CopyTo(fileStream);
+                }
+                category2.Image = ImageName;
+            }
+        }
         // GET: AdminPanel/Categories/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -89,7 +106,7 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Image,Name,Description")] Category category)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,File")] Category category)
         {
             if (id != category.ID)
             {
@@ -100,6 +117,7 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
             {
                 try
                 {
+                    uploadImage(category);
                     _context.Update(category);
                     await _context.SaveChangesAsync();
                 }
