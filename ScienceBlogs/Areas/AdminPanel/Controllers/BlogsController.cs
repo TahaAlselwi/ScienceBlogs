@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ScienceBlogs.Models;
-using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Hosting;
 
 namespace ScienceBlogs.Areas.AdminPanel.Controllers
 {
@@ -17,12 +17,13 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
     public class BlogsController : Controller
     {
         private readonly BlogsContext _context;
-        private IWebHostEnvironment webHost;
-        public BlogsController(BlogsContext context, IWebHostEnvironment webHost2)
+		private readonly IWebHostEnvironment _hostEnvironment;
+		public BlogsController(BlogsContext context, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
-            webHost = webHost2;
-        }
+			this._hostEnvironment = hostEnvironment;
+
+		}
 
         // GET: AdminPanel/Blogs
         public async Task<IActionResult> Index()
@@ -66,28 +67,27 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
         {
             if (ModelState.IsValid)
             {
-                uploadImage(blog);
-                _context.Add(blog);
+
+				//save image to wwwroot/Images/Blogs
+				string wwwRootPath = _hostEnvironment.WebRootPath;
+				string fileName = Path.GetFileNameWithoutExtension(blog.file.FileName);
+				string extension = Path.GetExtension(blog.file.FileName);
+				blog.Image = fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
+				string path = Path.Combine(wwwRootPath + "/Images/Blogs/", fileName);
+				using (var fileStream = new FileStream(path, FileMode.Create))
+				{
+					await blog.file.CopyToAsync(fileStream);
+
+				}
+
+				_context.Add(blog);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CategoryID"] = new SelectList(_context.Categories, "ID", "Name", blog.CategoryID);
             return View(blog);
         }
-        void uploadImage(Blog blog2)
-        {
-            if (blog2.file != null)
-            {
-                string ImagePath = Path.Combine(webHost.WebRootPath, "Images/Blogs");
-                string ImageName = new Guid() + ".jpg";
-                string TotalPath = Path.Combine(ImagePath, ImageName);
-                using (var fileStream = new FileStream(TotalPath, FileMode.Create))
-                {
-                    blog2.file.CopyTo(fileStream);
-                }
-                blog2.Image = ImageName;
-            }
-        }
+   
         // GET: AdminPanel/Blogs/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -121,8 +121,19 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
             {
                 try
                 {
-                    uploadImage(blog);
-                    _context.Update(blog);
+					//save image to wwwroot/Images/Blogs
+					string wwwRootPath = _hostEnvironment.WebRootPath;
+					string fileName = Path.GetFileNameWithoutExtension(blog.file.FileName);
+					string extension = Path.GetExtension(blog.file.FileName);
+					blog.Image = fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
+					string path = Path.Combine(wwwRootPath + "/Images/Blogs/", fileName);
+					using (var fileStream = new FileStream(path, FileMode.Create))
+					{
+						await blog.file.CopyToAsync(fileStream);
+
+					}
+
+					_context.Update(blog);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -173,7 +184,12 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
             var blog = await _context.Blogs.FindAsync(id);
             if (blog != null)
             {
-                _context.Blogs.Remove(blog);
+				//delete image from wwwroot/Images/Blogs
+				var imagePath = Path.Combine(_hostEnvironment.WebRootPath, "Images/Blogs", blog.Image);
+				if (System.IO.File.Exists(imagePath))
+					System.IO.File.Delete(imagePath);
+
+				_context.Blogs.Remove(blog);
             }
             
             await _context.SaveChangesAsync();

@@ -22,6 +22,8 @@
   <ItemGroup>
     <Folder Include="Areas\AdminPanel\Data\" />
     <Folder Include="Areas\AdminPanel\Models\" />
+    <Folder Include="wwwroot\Images\Blogs\" />
+    <Folder Include="wwwroot\Images\Categories\" />
   </ItemGroup>
 
 </Project>

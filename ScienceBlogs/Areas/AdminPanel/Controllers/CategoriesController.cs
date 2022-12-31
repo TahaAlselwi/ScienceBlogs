@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ScienceBlogs.Models;
-using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Hosting;
 
 namespace ScienceBlogs.Areas.AdminPanel.Controllers
 {
@@ -17,13 +17,13 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
     public class CategoriesController : Controller
     {
         private readonly BlogsContext _context;
-        private IWebHostEnvironment webHost;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public CategoriesController(BlogsContext context, IWebHostEnvironment webHost2)
+		public CategoriesController(BlogsContext context,IWebHostEnvironment hostEnvironment)
         {
             _context = context;
-            webHost = webHost2;
-        }
+            this._hostEnvironment = hostEnvironment;
+		}
 
         // GET: AdminPanel/Categories
         public async Task<IActionResult> Index()
@@ -64,26 +64,23 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
         {
             if (ModelState.IsValid)
             {
-                uploadImage(category);
-                _context.Add(category);
+				//save image to wwwroot/Images/Categories
+				string wwwRootPath = _hostEnvironment.WebRootPath;
+                string fileName = Path.GetFileNameWithoutExtension(category.File.FileName);
+                string extension = Path.GetExtension(category.File.FileName);
+				category.Image =fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
+                string path = Path.Combine(wwwRootPath + "/Images/Categories/", fileName);
+                using(var fileStream = new FileStream(path,FileMode.Create))
+                {
+                    await category.File.CopyToAsync(fileStream);
+
+				}
+
+				_context.Add(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
-        }
-        void uploadImage(Category category2)
-        {
-            if (category2.File != null)
-            {
-                string ImagePath = Path.Combine(webHost.WebRootPath, "Images/Categories");
-                string ImageName = new Guid() + ".jpg";
-                string TotalPath = Path.Combine(ImagePath, ImageName);
-                using (var fileStream = new FileStream(TotalPath, FileMode.Create))
-                {
-                    category2.File.CopyTo(fileStream);
-                }
-                category2.Image = ImageName;
-            }
         }
         // GET: AdminPanel/Categories/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -117,8 +114,19 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
             {
                 try
                 {
-                    uploadImage(category);
-                    _context.Update(category);
+					//save image to wwwroot/Images/Categories
+					string wwwRootPath = _hostEnvironment.WebRootPath;
+					string fileName = Path.GetFileNameWithoutExtension(category.File.FileName);
+					string extension = Path.GetExtension(category.File.FileName);
+					category.Image = fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
+					string path = Path.Combine(wwwRootPath + "/Images/Categories/", fileName);
+					using (var fileStream = new FileStream(path, FileMode.Create))
+					{
+						await category.File.CopyToAsync(fileStream);
+
+					}
+
+					_context.Update(category);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -167,7 +175,12 @@ namespace ScienceBlogs.Areas.AdminPanel.Controllers
             var category = await _context.Categories.FindAsync(id);
             if (category != null)
             {
-                _context.Categories.Remove(category);
+                //delete image from wwwroot/Images/Categories
+                var imagePath = Path.Combine(_hostEnvironment.WebRootPath, "Images/Categories", category.Image);
+                if (System.IO.File.Exists(imagePath))
+                    System.IO.File.Delete(imagePath);
+
+				_context.Categories.Remove(category);
             }
             
             await _context.SaveChangesAsync();

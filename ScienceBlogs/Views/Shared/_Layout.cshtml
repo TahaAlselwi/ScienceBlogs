@@ -6,7 +6,7 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 	<link rel="icon" href="~/assets/img/favicon.ico">
-	<title>Mediumish - A Medium style template by WowThemes.net</title>
+	<title>Science Blog</title>
 	<!-- Bootstrap core CSS -->
 	<link href="~/assets/css/bootstrap.min.css" rel="stylesheet">
 	<!-- Fonts -->
@@ -25,7 +25,7 @@
 		</button>
 		<div class="container">
 			<!-- Begin Logo -->
-			<a class="navbar-brand" href="index.html">
+			<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
 				<img src="~/assets/img/logo.png" alt="logo">
 			</a>
 			<!-- End Logo -->
@@ -43,9 +43,6 @@
 					}
 					<li class="nav-item active">
 						<a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home <span class="sr-only">(current)</span></a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" asp-area="" asp-controller="Home" asp-action="Post">Post</a>
 					</li>
 					<partial name="_LoginPartial" />
 
